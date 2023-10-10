@@ -1,23 +1,38 @@
 import { Link, Navigate, useLoaderData } from "react-router-dom";
 import Wrapper from "../assets/wrappers/CocktailPage";
+import { useQuery } from "@tanstack/react-query";
 
 const singleCocktailUrl =
   "https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=";
 
-export const loader = async ({ params }) => {
-  const { id } = params;
+const singleCocktailQuery = (id) => {
+  return {
+    queryKey: ["cocktail", id],
+    queryFn: async () => {
+      const response = await fetch(`${singleCocktailUrl}${id}`);
+      const cocktailData = await response.json();
 
-  const response = await fetch(`${singleCocktailUrl}${id}`);
-  const cocktailData = await response.json();
+      return { data: cocktailData.drinks };
+    },
+  };
+};
 
-  return { id, data: cocktailData.drinks };
+export const loader = (queryClient) => {
+  return async ({ params }) => {
+    const { id } = params;
+    await queryClient.ensureQueryData(singleCocktailQuery(id));
+
+    return { id };
+  };
 };
 
 function Cocktail() {
-  const { id, data } = useLoaderData();
+  const { id } = useLoaderData();
+  const { data } = useQuery(singleCocktailQuery(id));
+
   if (!data) return <Navigate to="/" />;
 
-  const singleDrink = data[0];
+  const singleDrink = data.data[0];
 
   const keysOfIngredients = Object.keys(singleDrink);
   const validIngredients = keysOfIngredients

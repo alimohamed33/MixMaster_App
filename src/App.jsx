@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools/build/lib/devtools";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import {
   About,
@@ -24,11 +24,11 @@ const router = createBrowserRouter([
     element: <AppLayout />,
     errorElement: <Error />,
     children: [
-      { index: true, element: <Landing />, loader: landingLoader },
+      { index: true, element: <Landing />, loader: landingLoader(queryClient) },
       {
         path: "/cocktail/:id",
         element: <Cocktail />,
-        loader: singleCocktailLoader,
+        loader: singleCocktailLoader(queryClient),
       },
       {
         path: "/newsletter",
